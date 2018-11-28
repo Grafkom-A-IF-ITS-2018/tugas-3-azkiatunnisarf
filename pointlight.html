@@ -1,0 +1,87 @@
+uniform vec3 u_lightWorldPosition;
+
+uniform mat4 u_world;
+ 
+...
+ 
+// compute the world position of the surfoace
+vec3 surfaceWorldPosition = (u_world * a_position).xyz;
+
+v_surfaceToLight = u_lightWorldPosition - surfaceWorldPosition;
+
+attribute vec4 a_position;
+attribute vec3 a_normal;
+ 
+uniform vec3 u_lightWorldPosition;
+ 
+uniform mat4 u_world;
+uniform mat4 u_worldViewProjection;
+uniform mat4 u_worldInverseTranspose;
+ 
+varying vec3 v_normal;
+ 
+varying vec3 v_surfaceToLight;
+ 
+void main() {
+  // Multiply the position by the matrix.
+  gl_Position = u_worldViewProjection * a_position;
+ 
+  // orient the normals and pass to the fragment shader
+  v_normal = mat3(u_worldInverseTranspose) * a_normal;
+ 
+  // compute the world position of the surfoace
+  vec3 surfaceWorldPosition = (u_world * a_position).xyz;
+ 
+  // compute the vector of the surface to the light
+  // and pass it to the fragment shader
+  v_surfaceToLight = u_lightWorldPosition - surfaceWorldPosition;
+}
+
+precision mediump float;
+ 
+// Passed in from the vertex shader.
+varying vec3 v_normal;
+varying vec3 v_surfaceToLight;
+ 
+uniform vec3 u_reverseLightDirection;
+uniform vec4 u_color;
+ 
+void main() {
+  // because v_normal is a varying it's interpolated
+  // we it will not be a uint vector. Normalizing it
+  // will make it a unit vector again
+  vec3 normal = normalize(v_normal);
+ 
+  vec3 surfaceToLightDirection = normalize(v_surfaceToLight);
+ 
+  float light = dot(v_normal, u_reverseLightDirection);
+  float light = dot(v_normal, surfaceToLightDirection);
+ 
+  gl_FragColor = u_color;
+ 
+  // Lets multiply just the color portion (not the alpha)
+  // by the light
+  gl_FragColor.rgb *= light;
+}
+
+var lightWorldPositionLocation =
+      gl.getUniformLocation(program, "u_lightWorldPosition");
+  var worldLocation =
+      gl.getUniformLocation(program, "u_world");
+
+// Set the matrices
+  gl.uniformMatrix4fv(
+      worldLocation, false,
+      worldMatrix);
+  gl.uniformMatrix4fv(
+      worldViewProjectionLocation, false,
+      worldViewProjectionMatrix);
+ 
+  ...
+ 
+  // set the light direction.
+  gl.uniform3fv(reverseLightDirectionLocation, m4.normalize([0.5, 0.7, 1]));
+  // set the light position
+  gl.uniform3fv(lightWorldPositionLocation, [20, 30, 50]);
+
+
