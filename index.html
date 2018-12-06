@@ -81,10 +81,47 @@
         shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, 'aVertexPosition')
         gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute)
         shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, 'aVertexColor')
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
         gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute)
         shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, 'uPMatrix')
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, 'uMVMatrix')
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, 'uSampler')
       }
+
+      function handleLoadedTexture(textures) {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true)
+        // Sampler 1
+        gl.bindTexture(gl.TEXTURE_2D, textures[0])
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[0].image)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+        // Sampler 2
+        gl.bindTexture(gl.TEXTURE_2D, textures[1])
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[1].image)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        // Sampler 3
+        gl.bindTexture(gl.TEXTURE_2D, textures[2])
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[2].image)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
+        gl.generateMipmap(gl.TEXTURE_2D)
+        gl.bindTexture(gl.TEXTURE_2D, null)
+      }
+      var crateTextures = Array()
+        function initTexture() {
+          var crateImage = new Image()
+          for (var i = 0; i < 3; i++) {
+            var texture = gl.createTexture()
+            texture.image = crateImage
+            crateTextures.push(texture)
+          }
+          crateImage.onload = function () {
+            handleLoadedTexture(crateTextures)
+          }
+          crateImage.src = 'Crate.jpg'
+      }
+
       var mvMatrix = mat4.create()
       var mvMatrixStack = []
       var pMatrix = mat4.create()
@@ -107,6 +144,7 @@
       var sVertexPositionBuffer
       var sVertexColorBuffer
       var cubeVertexPositionBuffer
+      var cubeVertexTextureCoordBuffer
       var cubeVertexColorBuffer
       var sBound = []
       var ss
@@ -373,6 +411,31 @@
         cubeVertexColorBuffer.itemSize = 4;
         cubeVertexColorBuffer.numItems = 4;
       }
+
+      cubeVertexTextureCoordBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer)
+
+      var textureCoords = [
+        // Back face
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        // Bottom face
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+        1.0, 0.0,
+        // Right face
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0,
+        0.0, 0.0,
+      ]
+
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW)
+      cubeVertexTextureCoordBuffer.itemSize = 2
+      cubeVertexTextureCoordBuffer.numItems = 24
       
       var xDirect = 1.0, yDirect = 1.0, zDirect = 1.0
       var rot = 1.0
