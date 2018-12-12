@@ -103,6 +103,11 @@
     attrIntializer.execute(gl,shaderProgram)
 }
 
+      /*light*/
+      function light(){
+        var lightWorldPositionLocation = gl.getUniformLocation(shaderProgram, "u_lightWorldPosition");
+        gl.uniform3fv(lightWorldPositionLocation, [20, 30, 60]);
+      }
       /*draw scene*/
       function Scene(factory) {
   var factory = factory
