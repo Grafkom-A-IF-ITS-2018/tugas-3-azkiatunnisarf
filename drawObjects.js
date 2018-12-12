@@ -220,7 +220,7 @@ function ObjectFactory(GL,shader){
     gl.bindBuffer(gl.ARRAY_BUFFER, hurufVertexColorBuffer)
     huruf.colors = []
     for (var i=0; i < hurufVertexPositionBuffer.numItems; i++) {
-      huruf.colors = huruf.colors.concat([232, 69, 4, 1.0])
+          huruf.colors = huruf.colors.concat([8.9, 7.2, 0.3, 1.0]);
     }
     hurufVertexColorBuffer.itemSize = 4
     hurufVertexColorBuffer.numItems = 18
